@@ -3,9 +3,11 @@ import json
 
 class SamcoCalls():
 
-    def __init__(self,sessionToken):
+    def __init__(self,credential):
         self.samco = StocknoteAPIPythonBridge()
-        self.samco.set_session_token(sessionToken=sessionToken)
+        login = json.loads(self.samco.login(body=credential))
+        self.samco.set_session_token(sessionToken=login['sessionToken'])
+
     def optioncontract(self,search_symbol_name,expiry_date):
         return json.loads(self.samco.get_option_chain(search_symbol_name=search_symbol_name, exchange=self.samco.EXCHANGE_NFO,
                                      expiry_date=expiry_date))

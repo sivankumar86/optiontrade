@@ -7,7 +7,7 @@ from ddb import dynamodbops as ddb
 import uuid
 
 app = Flask(__name__)
-samco=SamcoCalls("3f5e25732e6bc3316dcbfc728b4262a8")
+
 
 
 @app.route("/")
@@ -98,11 +98,10 @@ def positionview():
    reduceoption=res["positionDetails"]
    return render_template('position.html', r=reduceoption)
 
-
-
-
 if __name__ == "__main__":
     app.config.from_pyfile(os.path.join(".", "config/app.conf"), silent=False)
+    print(app.config.get("USERNAME"))
+    samco = SamcoCalls({"userId": app.config.get("USERNAME"), 'password': app.config.get("PASSWORD"), 'yob': app.config.get("DOB")})
     app.run(debug=True)
 
   ##50477696

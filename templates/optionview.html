@@ -43,6 +43,8 @@ $('body').on("contextmenu", ".optionclick", function(e){
     </script>
 </head>
 <body>
+{% extends "template.html" %}
+{% block content %}
 <div class="wrap">
     <div>
   <h1>OPTION Chain</h1>
@@ -125,5 +127,6 @@ $('body').on("contextmenu", ".optionclick", function(e){
     </ul>
   </div>
     </div>
+ {% endblock %}
 </body>
 </html>

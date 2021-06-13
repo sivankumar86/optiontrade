@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-          <link rel="stylesheet" href="static/css/template.css"/>
-          <link rel="stylesheet" href="static/css/dropdown.css"/>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <title>Stratergy</title>
@@ -22,6 +21,11 @@
  });
   }
 $(document).ready(function(){
+
+$("#refreshbutton").click(function(){
+ updateprice();
+});
+
 $('select').change(function(){
    var id = $(this).attr("id").split("_")[1]
    var symbol=$(this).val()
@@ -32,12 +36,11 @@ $('select').change(function(){
 
 
 $('.status').click(function(){
-
 var id = $(this).attr("id").split("_")[1]
-$("#modifymenu_"+id).css({display: "block"});
-//
-  });
+$("#modifymenu_"+id).toggle()
+});
 
+//update the price on load
 updateprice();
 
 });
@@ -74,9 +77,7 @@ var sid=$("#stratergyid").val()
 //window.setInterval('orderupdate()', 5000);
 
 
-$("#refreshbutton").click(function(){
- updateprice();
-});
+
 
 
 function getorderstatus(orderid,id){
@@ -129,6 +130,8 @@ alert(id);
 </script>
 </head>
 <body>
+{% extends "template.html" %}
+ {% block content %}
 <div class="wrap">
     <div>
   <h1>OPTION Stratergy</h1>
@@ -151,6 +154,8 @@ alert(id);
             <th>optionType</th>
             <th>LTP</th>
             <th>Bestprice</th>
+            <th>Tradedprice</th>
+            <th>TotalValue</th>
             <th>orderstatus</th>
 
         </tr>
@@ -175,6 +180,8 @@ alert(id);
                     <td> {{data.type}}</td>
                     <td id="lt_{{ loop.index }}"> </td>
                     <td id="bp_{{ loop.index }}"> </td>
+                    <td id="tp_{{ loop.index }}"> </td>
+                    <td id="tv_{{ loop.index }}"> </td>
                     <td id="ts_{{ loop.index }}" class="status">
                         <div id="tsi_{{ loop.index }}">pending</div>
                          <div id="modifymenu_{{ loop.index }}" class="modifymenu">
@@ -189,11 +196,15 @@ alert(id);
 </table>
         </div>
     <div class="box">
+        <div id="ml"> MaxLoss : <span id="maxloss"></span> -00</div>
+            <div id="mg">MaxGain : <span id="maxgain"> </span>00</div>
+        </div>
    <input type="button" value="Execute" onclick="execute()"/>
    <input id="stratergyid" type="hidden" value="{{ id }}" />
 
     </div>
 
 </div>
+ {% endblock %}
 </body>
 </html>
