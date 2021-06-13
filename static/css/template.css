@@ -124,4 +124,23 @@ table td {
   background-clip: padding-box; /* Add this line */
 }
 
+.modifymenu{
+display:none;
+}
+
+#refreshbutton{
+  float: right;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 5px 3px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+
 

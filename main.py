@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-
+import os
 from tradeapi.samcoAPI import SamcoCalls
 from flask import request
 
@@ -7,7 +7,7 @@ from ddb import dynamodbops as ddb
 import uuid
 
 app = Flask(__name__)
-samco=SamcoCalls("")
+samco=SamcoCalls("3f5e25732e6bc3316dcbfc728b4262a8")
 
 
 @app.route("/")
@@ -32,7 +32,8 @@ def getquote():
   symbol = request.args.get('symbol')
   activity = request.args.get('activity')
   res=samco.getQuotes(symbol)
-  bestprice= float(res["bestAsks"][0]["price"])-0.2 if (activity=="sell") else float(res["bestBids"][0]["price"])+0.2
+  print(res)
+  bestprice= float(res["bestAsks"][0]["price"])-0.2 if (activity=="SELL") else float(res["bestBids"][0]["price"])-0.2
   return {"strike":symbol[-7:-2],"ltp":res["lastTradedPrice"],"bestprice":bestprice}
 
 
@@ -43,10 +44,10 @@ def spread():
   type=symbol[-2:]
   if (type=='PE'):
     strike2 = int(strike) - 300;
-    name="Put Spread"
+    name="PutSpread"
   else:
     strike2 = int(strike) +300;
-    name="Call Spread"
+    name="CallSpread"
 
   randomid = uuid.uuid1()
   id="{}_{}".format(name,randomid)
@@ -101,6 +102,7 @@ def positionview():
 
 
 if __name__ == "__main__":
-  app.run(debug=True)
+    app.config.from_pyfile(os.path.join(".", "config/app.conf"), silent=False)
+    app.run(debug=True)
 
   ##50477696

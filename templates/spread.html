@@ -30,11 +30,18 @@ $('select').change(function(){
 
 });
 
+
+$('.status').click(function(){
+
+var id = $(this).attr("id").split("_")[1]
+$("#modifymenu_"+id).css({display: "block"});
+//
+  });
+
 updateprice();
 
 });
 
-//window.setInterval('updateprice()', 5000);
 
 function updateQuote(symbol,activity,id){
 $.ajax({ type: "GET",
@@ -46,10 +53,33 @@ $.ajax({ type: "GET",
          $("#bp_"+id).html(text['bestprice'].toFixed(2))
          $("#sp_"+id).html(text['strike'])
          }
+
 });
+
 }
 
-function getorderstatus(orderid){
+function orderupdate(){
+
+$('#myTable').find('tr').each(function (id) {
+var sid=$("#stratergyid").val()
+   if(id >0) {
+   var orderid=$("#oid_"+id).val().trim()
+         if(orderid!=""){
+          getorderstatus(orderid,id)
+         }
+   }
+  });
+}
+
+//window.setInterval('orderupdate()', 5000);
+
+
+$("#refreshbutton").click(function(){
+ updateprice();
+});
+
+
+function getorderstatus(orderid,id){
 var status=""
 $.ajax({ type: "GET",
          url: "/getorderstaus?ordernumber="+orderid,
@@ -57,6 +87,7 @@ $.ajax({ type: "GET",
          success : function(text)
          {
            status=text["orderStatus"]
+           $("#ts_"+id).val(status)
          }
 });
 
@@ -90,6 +121,11 @@ $('#myTable').find('tr').each(function (id) {
   placeOrder(id,orders)
 
 }
+
+function modifyOrder(id){
+alert(id);
+}
+
 </script>
 </head>
 <body>
@@ -100,9 +136,13 @@ $('#myTable').find('tr').each(function (id) {
     <div>
           <h1>{{ spreadname }}</h1>
 
+        <div id="refresh">
+            <button  id="refreshbutton" > Refresh </button>
+        </div>
+
     </div>
     <div class="box">
-<table  id="myTable">
+<table  id="myTable" cellspacing="0">
         <thead>
         <tr>
             <th>tradingSymbol</th>
@@ -135,9 +175,15 @@ $('#myTable').find('tr').each(function (id) {
                     <td> {{data.type}}</td>
                     <td id="lt_{{ loop.index }}"> </td>
                     <td id="bp_{{ loop.index }}"> </td>
-                    <td id="ts_{{ loop.index }}">pending </td>
+                    <td id="ts_{{ loop.index }}" class="status">
+                        <div id="tsi_{{ loop.index }}">pending</div>
+                         <div id="modifymenu_{{ loop.index }}" class="modifymenu">
+                             <input type="button" value="Modify" onclick="modifyOrder( {{ loop.index }} )"/>
+                         </div>
+                    </td>
 
                 </tr>
+           <input id="oid_{{ loop.index }}" type="hidden" value="" />
            {%endfor%}
         </tbody>
 </table>
@@ -147,6 +193,7 @@ $('#myTable').find('tr').each(function (id) {
    <input id="stratergyid" type="hidden" value="{{ id }}" />
 
     </div>
+
 </div>
 </body>
 </html>
