@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <link rel="stylesheet" href="static/css/template.css"/>
+          <link rel="stylesheet" href="static/css/dropdown.css"/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>OptionView</title>
+    <script type="text/javascript">
+
+    </script>
+</head>
+<body>
+<div class="wrap">
+    <div>
+  <h1>OPTION Chain</h1>
+</div>
+
+
+<table  id="myTable">
+        <thead>
+        <tr>
+            <th>tradingSymbol</th>
+            <th>netQuantity</th>
+            <th>TradedPrice</th>
+            <th>LastTradedPrice</th>
+            <th>Profit/Loss</th>
+        </tr>
+        </thead>
+        <tbody id="mydata">
+        {% set total_amount = [] %}
+            {%for data in r%}
+               <tr>
+                   <td>{{data.tradingSymbol}}</td>
+                    {% if data.transactionType=='BUY' %}
+                            <td>{{data.netQuantity}}</td>
+                    {%else%}
+                    <td>-{{data.netQuantity}}</td>
+                    {% endif %}
+
+                   <td>{{data.averagePrice}}</td>
+                   <td>{{data.lastTradedPrice}}</td>
+                    {% if data.transactionType=='BUY' %}
+                   {% set PL =(data.netQuantity |float * data.lastTradedPrice|float) - (data.netQuantity |float * data.averagePrice|float) %}
+                   <td>{{'%0.2f' % PL}}</td>
+
+               {%else%}
+                   {% set PL =(data.netQuantity |float * data.averagePrice|float) - (data.netQuantity |float * data.lastTradedPrice|float) %}
+                   <td>{{'%0.2f' % PL}}</td>
+                   {% endif %}
+
+             {% if total_amount.append(PL) %}{% endif %}
+
+               </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+      TOTAL P/L = {{ '%0.2f' % total_amount|sum }}
+    </div>
+</body>
+</html>

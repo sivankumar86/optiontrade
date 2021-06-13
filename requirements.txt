@@ -1,0 +1,7 @@
+Flask==2.0.1
+stocknotebridge==1.0.1
+six==1.16.0
+websocket-client==0.57.0
+#websocket==9.1
+business_calendar==0.2.1
+boto3==1.17.91

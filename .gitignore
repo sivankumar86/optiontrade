@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#local change
+*test.py
+.idea/
+pythonenv/
+
 # C extensions
 *.so
 

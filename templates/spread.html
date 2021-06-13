@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+          <link rel="stylesheet" href="static/css/template.css"/>
+          <link rel="stylesheet" href="static/css/dropdown.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <title>Stratergy</title>
+
+    <script type="text/javascript">
+
+  function updateprice(){
+  $('#myTable').find('tr').each(function (id) {
+
+   if(id >0) {
+   var symbol=$("#si_"+id).val()
+   var activity=$("#at_"+id).text().trim()
+   updateQuote(symbol,activity,id)
+   }
+
+ });
+  }
+$(document).ready(function(){
+$('select').change(function(){
+   var id = $(this).attr("id").split("_")[1]
+   var symbol=$(this).val()
+   var activity=$("#at_"+id).text().trim()
+   updateQuote(symbol,activity,id)
+
+});
+
+updateprice();
+
+});
+
+//window.setInterval('updateprice()', 5000);
+
+function updateQuote(symbol,activity,id){
+$.ajax({ type: "GET",
+         url: "/getquote?symbol="+symbol+"&activity="+activity,
+         async: true,
+         success : function(text)
+         {
+         $("#lt_"+id).html(text['ltp'])
+         $("#bp_"+id).html(text['bestprice'].toFixed(2))
+         $("#sp_"+id).html(text['strike'])
+         }
+});
+}
+
+function getorderstatus(orderid){
+var status=""
+$.ajax({ type: "GET",
+         url: "/getorderstaus?ordernumber="+orderid,
+         async: true,
+         success : function(text)
+         {
+           status=text["orderStatus"]
+         }
+});
+
+return status
+}
+
+function placeOrder(id,orders){
+$.ajax({ type: "POST",
+         url: "/placeOrder",
+         data:{"id":id,"orders":JSON.stringify(orders)},
+         dataType: "json",
+         success : function(text)
+         {
+         var status=getorderstatus(text["executiondetails"])
+
+         }
+});
+}
+
+function execute() {
+  var orders=[]
+$('#myTable').find('tr').each(function (id) {
+   if(id >0) {
+   var symbol=$("#si_"+id).val()
+   var activity=$("#at_"+id).val().trim()
+   var bprice=$("#si_"+id).val()
+   orders.push({"symbol":symbol,"activity":activity,"oid":id,"bprice":bprice})
+   }
+  });
+  var id=$("#stratergyid").val()
+  placeOrder(id,orders)
+
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+    <div>
+  <h1>OPTION Stratergy</h1>
+</div>
+    <div>
+          <h1>{{ spreadname }}</h1>
+
+    </div>
+    <div class="box">
+<table  id="myTable">
+        <thead>
+        <tr>
+            <th>tradingSymbol</th>
+            <th>Activity</th>
+            <th>strikePrice</th>
+            <th>optionType</th>
+            <th>LTP</th>
+            <th>Bestprice</th>
+            <th>orderstatus</th>
+
+        </tr>
+        </thead>
+        <tbody id="mydata">
+          {%for data in trade%}
+                <tr class="{{ data.activity }}">
+                    <td id="tsym_{{ loop.index }}">
+                        <select id="si_{{ loop.index }}" name="symbol">
+                             {%for symbol in data.symbols%}
+                                               {% if  symbol==data.symbol  %}
+                                 <option value="{{ symbol }}" selected>{{symbol}}</option>
+                                            {% else  %}
+            <option value="{{ symbol }}" >{{symbol}}</option>
+
+{% endif  %}
+                            {%endfor%}
+                          </select>
+                               </td>
+                   <td id="at_{{ loop.index }}"> {{data.activity}}</td>
+                    <td id="sp_{{ loop.index }}"> {{data.strike}}</td>
+                    <td> {{data.type}}</td>
+                    <td id="lt_{{ loop.index }}"> </td>
+                    <td id="bp_{{ loop.index }}"> </td>
+                    <td id="ts_{{ loop.index }}">pending </td>
+
+                </tr>
+           {%endfor%}
+        </tbody>
+</table>
+        </div>
+    <div class="box">
+   <input type="button" value="Execute" onclick="execute()"/>
+   <input id="stratergyid" type="hidden" value="{{ id }}" />
+
+    </div>
+</div>
+</body>
+</html>

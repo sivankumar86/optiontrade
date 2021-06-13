@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <link rel="stylesheet" href="static/css/template.css"/>
+          <link rel="stylesheet" href="static/css/dropdown.css"/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>OptionView</title>
+    <script type="text/javascript">
+
+$(function() {
+
+var $contextMenu=$("#contextMenu")
+
+$('body').on("contextmenu", ".optionclick", function(e){
+  $contextMenu.css({
+              display: "block",
+              left: e.pageX,
+              top: e.pageY
+         });
+   var tsym=$(this).text().trim()
+   var listItems = $("#contextMenu ul li a");
+   listItems.each(function(idx) {
+   var newUrl="/"+$(this).attr('id')+"?symbol="+tsym;
+   $(this).attr("href", newUrl);
+
+});
+   return false;
+});
+
+   $('html').click(function() {
+         $contextMenu.hide();
+    });
+
+  $("#contextMenu li a").click(function(e){
+    var  f = $(this);
+  });
+
+});
+
+    </script>
+</head>
+<body>
+<div class="wrap">
+    <div>
+  <h1>OPTION Chain</h1>
+</div>
+<table  id="myTable">
+        <thead>
+        <tr>
+            <th>tradingSymbol</th>
+            <th>strikePrice</th>
+            <th>expiryDate</th>
+            <th>optionType</th>
+            <th>LTP </th>
+            <th>tradingSymbol</th>
+            <th>strikePrice</th>
+            <th>expiryDate</th>
+            <th>optionType</th>
+            <th>LTP </th>
+
+
+        </tr>
+        </thead>
+        <tbody id="mydata">
+            {% set count = namespace(value=1) %}
+            {%for data in r%}
+            {% if count.value%2!=0 %}
+             <tr>
+                 {% if  data.strikePrice < data.spotPrice  %}
+                <td class="itm">
+                    <div class="optionclick">
+   {{data.tradingSymbol}}
+</div></td>
+                 <td class="itm">{{data.strikePrice}}</td>
+                 <td class="itm">{{data.expiryDate}}</td>
+                 <td class="itm">{{data.optionType}}</td>
+                    <td class="otm">{{data.lastTradedPrice}}</td>
+                  {% else %}
+                 <td class="otm"><div class="optionclick">
+   {{data.tradingSymbol}}
+</div>
+</td>
+                 <td class="otm">{{data.strikePrice}}</td>
+                 <td class="otm">{{data.expiryDate}}</td>
+                 <td class="otm">{{data.optionType}}</td>
+                  <td class="otm">{{data.lastTradedPrice}}</td>
+                   {% endif %}
+                {% else %}
+                {% if  data.strikePrice >data.spotPrice  %}
+                <td class="itm">
+                    <div class="optionclick">
+   {{data.tradingSymbol}}
+</div></td>
+                 <td class="itm">{{data.strikePrice}}</td>
+                 <td class="itm">{{data.expiryDate}}</td>
+                 <td class="itm">{{data.optionType}}</td>
+                    <td class="otm">{{data.lastTradedPrice}}</td>
+                  {% else %}
+                 <td class="otm"><div class="optionclick">
+                     {{data.tradingSymbol}} </div> </td>
+                 <td class="otm">{{data.strikePrice}}</td>
+                 <td class="otm">{{data.expiryDate}}</td>
+                 <td class="otm">{{data.optionType}}</td>
+                    <td class="otm">{{data.lastTradedPrice}}</td>
+                   {% endif %}
+            </tr>
+            {% endif %}
+            {% set count.value = count.value + 1 %}
+            {%endfor%}
+        </tbody>
+    </table>
+    <div id="contextMenu" class="dropdown clearfix">
+    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+      <li><a id="spread" tabindex="-1" >Spread</a>
+      </li>
+      <li><a id="butteryfly" tabindex="-1" >ButterFly</a>
+      </li>
+      <li><a id="unbalancedbf" tabindex="-1" >UnbalancedButterFly</a>
+      </li>
+      <li><a id="ironcondor" tabindex="-1" >IronCondor</a>
+      </li>
+    </ul>
+  </div>
+    </div>
+</body>
+</html>

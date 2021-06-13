@@ -1,0 +1,46 @@
+.dropdown-menu>li>a {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+}
+a {
+    color: #337ab7;
+    text-decoration: none;
+}
+
+a {
+    background-color: transparent;
+}
+#contextMenu {
+  position: absolute;
+  display: none;
+  background-color:grey
+}
+
+.wrap{
+  width:90%;
+  display:block;
+  margin:0 auto;
+
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin:2px
+}
+
+
+.itm{
+ background-color:yellow;
+  border: 1px solid #000;
+  border-collapse: collapse;
+  margin: 0;
+  padding: 4px;
+  position: relative;
+  background-clip: padding-box; /* Add this line */
+
+}
