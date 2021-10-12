@@ -1,11 +1,15 @@
 # These are standard strategies to be used at your own risk only after complete information.
+import math
+import logging
 
 class strategies:
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
 
     def __init__(self,broker):
         self.Client = broker
 
-    def get_scripcode(self, symbol, strike, expiry, opt):
+    def get_scripcode(self, symbol, strike, expiry, opt,etype):
         month = {
             "01": 'JAN',
             "02": 'FEB',
@@ -22,21 +26,18 @@ class strategies:
         }
         date = expiry[6:]
         mon = month[expiry[4:6]]
-        year = expiry[:4]
+        year = expiry[2:4]
         symbol = symbol.upper()
-        strike_f = "{:.2f}".format(float(strike))
-        sym = f'{symbol} {date} {mon} {year} {opt} {strike_f}'
-        req = [
-            {"Exch": "N", "ExchType": "D", "Symbol": sym, "Expiry": expiry, "StrikePrice": strike, "OptionType": opt}]
-        res = self.Client.fetch_market_feed(req)
-        token = res['Data'][0]['Token']
-        return token
-
-    def intraday(self, intra):
-        if intra == 'I':
-            return True
+        if(etype=="m"):
+            sym=f'{symbol}{year}{mon}{strike}{opt}'
         else:
-            return False
+            sym=f'{symbol}{date}{mon}{year}{strike}{opt}'
+
+        res=self.Client.getQuotes(symbol=sym)
+
+        return res
+
+
 
     def short_straddle(self, symbol, strike, qty, expiry, intra):
         self.symbol = symbol
@@ -50,9 +51,80 @@ class strategies:
             sc = self.get_scripcode(self.symbol, self.strike, self.expiry, opt)
             scrip.append(sc)
 
-        order_status = self.Client.place_order(scrip)
+        order_status = self.Client.placeOrder(scrip)
         print(order_status)
 
+    def credit_call(self, symbol,sellstrike,buystrike, qty, expiry, etype):
+        self.symbol = symbol
+        self.buystrike = buystrike
+        self.sellstrike = sellstrike
+        self.qty = qty
+        self.expiry = expiry
+        self.etype = etype
+        scrip = []
+        option = 'CE'
+        if (sellstrike > buystrike):
+            return "buystrike less than sellstrike"
+
+        sc = self.get_scripcode(self.symbol, self.buystrike, self.expiry, option,etype)
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=2.0):
+            scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_BUY,"bprice":math.ceil(float(sc["bestAsks"][0]["price"]))-0.20})
+        else:
+            return "not eligible bc of first"
+        sc = self.get_scripcode(self.symbol, self.sellstrike, self.expiry, option,etype)
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=2.0):
+         scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_SELL,"bprice":math.ceil(float(sc["bestBids"][0]["price"]))-0.50})
+        else:
+            return "not eligible bc of second"
+        status=[]
+        logging.info(scrip)
+        for order in scrip:
+            order_status = self.Client.placeOrder(**order)
+            logging.info(order_status)
+            status.append(order_status)
+            if order_status['status'] == 'Success':
+                 continue
+            else:
+                 logging.info('Order process failed !')
+                 break
+
+        return status
+
+
+    def credit_put(self, symbol,sellstrike,buystrike, qty, expiry, etype):
+        self.symbol = symbol
+        self.buystrike = buystrike
+        self.sellstrike = sellstrike
+        self.qty = qty
+        self.expiry = expiry
+        self.etype = etype
+        scrip = []
+        option = 'PE'
+        if(buystrike>sellstrike):
+            return "buystrike greater than sellstrike"
+        sc = self.get_scripcode(self.symbol, self.buystrike, self.expiry, option,etype)
+        #print(sc)
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <2.0):
+            scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_BUY,"bprice":math.ceil(float(sc["bestAsks"][0]["price"]))-0.20})
+        else:
+            return "not eligible bc of first"
+        sc = self.get_scripcode(self.symbol, self.sellstrike, self.expiry, option,etype)
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <2.0):
+         scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_SELL,"bprice":math.ceil(float(sc["bestBids"][0]["price"]))-0.50})
+        else:
+            return "not eligible bc of second"
+        status=[]
+        print(scrip)
+        for order in scrip:
+            order_status = self.Client.placeOrder(**order)
+            print(order_status)
+            status.append(order_status)
+            if order_status['status'] == 'Success':
+                 continue
+            else:
+                 break
+
+        return status
 
     def short_strangle(self, symbol, strike, qty, expiry, intra):
         strike.sort()
