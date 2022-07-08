@@ -11,7 +11,7 @@ obj = SmartConnect(api_key="DW73g7kC")
 
                    # login api call
 
-data=obj.generateSession("P103324", "L@cky@07")
+data=obj.generateSession("P103324", "L@jkjk@07")
 refreshToken = data['data']['refreshToken']
 
 # fetch the feedtoken
