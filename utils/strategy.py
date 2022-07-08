@@ -67,12 +67,51 @@ class strategies:
             return "buystrike less than sellstrike"
 
         sc = self.get_scripcode(self.symbol, self.buystrike, self.expiry, option,etype)
-        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=2.0):
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=5.0):
+            scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_BUY,"bprice":math.ceil(float(sc["bestAsks"][0]["price"]))-0.20})
+        else:
+            print(str(sc["bestAsks"][0]["price"]),str(float(sc["bestBids"][0]["price"])))
+            return "not eligible bc of first"
+        sc = self.get_scripcode(self.symbol, self.sellstrike, self.expiry, option,etype)
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=5.0):
+         scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_SELL,"bprice":math.ceil(float(sc["bestBids"][0]["price"]))-0.50})
+        else:
+            print(str(sc["bestAsks"][0]["price"]), str(float(sc["bestBids"][0]["price"])))
+            return "not eligible bc of second"
+        status=[]
+        logging.info(scrip)
+        for order in scrip:
+            order_status = self.Client.placeOrder(**order)
+            logging.info(order_status)
+            status.append(order_status)
+            if order_status['status'] == 'Success':
+                 continue
+            else:
+                 logging.info('Order process failed !')
+                 break
+
+        return status
+
+
+    def debit_call(self, symbol,buystrike,sellstrike, qty, expiry, etype):
+        self.symbol = symbol
+        self.buystrike = buystrike
+        self.sellstrike = sellstrike
+        self.qty = qty
+        self.expiry = expiry
+        self.etype = etype
+        scrip = []
+        option = 'CE'
+        if (buystrike>sellstrike):
+            return "buystrike less than sellstrike"
+
+        sc = self.get_scripcode(self.symbol, self.buystrike, self.expiry, option,etype)
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=3.0):
             scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_BUY,"bprice":math.ceil(float(sc["bestAsks"][0]["price"]))-0.20})
         else:
             return "not eligible bc of first"
         sc = self.get_scripcode(self.symbol, self.sellstrike, self.expiry, option,etype)
-        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=2.0):
+        if (abs(float(sc["bestAsks"][0]["price"])-float(sc["bestBids"][0]["price"])) <=3.0):
          scrip.append({"symbol":sc['tradingSymbol'],"quantity":qty,"tradetype":self.Client.TRANSACTION_TYPE_SELL,"bprice":math.ceil(float(sc["bestBids"][0]["price"]))-0.50})
         else:
             return "not eligible bc of second"
